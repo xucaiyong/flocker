@@ -34,7 +34,7 @@ Ubuntu
 
 .. prompt:: bash alice@ubuntu:~$
 
-   cat <<EOF > /etc/init/flocker-control.override
+   cat <<EOF | sudo tee /etc/init/flocker-control.override
    > start on runlevel [2345]
    > stop on runlevel [016]
    > EOF
