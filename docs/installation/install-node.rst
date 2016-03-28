@@ -24,6 +24,7 @@ Before you begin to install the Flocker node services, you will need the followi
   * To avoid potential disk space problems (for example, when storing popular Docker images), we recommend a minimum of 16 GB storage on each node.
 
 * You will need permission for SSH access from your laptop.
+* You will need to be able to run commands as the superuser.
 * Depending on your usage of Flocker, you will require access to a range of ports.
   For example, instructions on specifying which ports to make available are included in the Amazon Web Services guide.
 * Flocker's container management features depend on Docker.
@@ -65,14 +66,14 @@ Installing on CentOS 7
    Run the following commands on the target node:
 
    .. task:: install_flocker centos-7
-      :prompt: alice@mercury:~$
+      :prompt: alice@centos:~$
 
 #. **Install the** ``clusterhq-flocker-docker-plugin`` **package:**
 
    At this point you can choose to install the Flocker plugin for Docker.
    Run the following command on the target node:
 
-   .. prompt:: bash alice@mercury:~$
+   .. prompt:: bash alice@centos:~$
 
       sudo yum install -y clusterhq-flocker-docker-plugin
 
@@ -108,14 +109,14 @@ Installing on Ubuntu 14.04
    Run the following commands on the target node:
 
    .. task:: install_flocker ubuntu-14.04
-      :prompt: alice@mercury:~$
+      :prompt: alice@ubuntu:~$
 
 #. **Install the** ``clusterhq-flocker-docker-plugin`` **package:**
 
    At this point you can choose to install the Flocker plugin for Docker.
    Run the following command on the target node:
 
-   .. prompt:: bash alice@mercury:~$
+   .. prompt:: bash alice@ubuntu:~$
 
       sudo apt-get install -y clusterhq-flocker-docker-plugin
 

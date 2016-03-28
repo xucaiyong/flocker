@@ -14,7 +14,7 @@ CentOS 7
 ========
 
 .. task:: enable_flocker_control centos-7
-   :prompt: alice@mercury:~$
+   :prompt: alice@centos:~$
 
 The control service needs to be accessible remotely.
 You will need to configure FirewallD to allow access to the control service HTTP API and for agent connections.
@@ -23,7 +23,7 @@ If that is the case then just skip these commands.
 Otherwise run:
 
 .. task:: open_control_firewall centos-7
-   :prompt: alice@mercury:~$
+   :prompt: alice@centos:~$
 
 For more details on configuring the firewall, see the `FirewallD documentation`_.
 
@@ -32,7 +32,7 @@ On AWS, an external firewall is used instead, which will need to be configured s
 Ubuntu
 ======
 
-.. prompt:: bash alice@mercury:~$
+.. prompt:: bash alice@ubuntu:~$
 
    cat <<EOF > /etc/init/flocker-control.override
    > start on runlevel [2345]
@@ -46,7 +46,7 @@ The control service needs to accessible remotely.
 To configure ``UFW`` to allow access to the control service HTTP API, and for agent connections:
 
 .. task:: open_control_firewall ubuntu-14.04
-   :prompt: alice@mercury:~$
+   :prompt: alice@ubuntu:~$
 
 For more details on configuring the firewall, see Ubuntu's `UFW documentation`_.
 
