@@ -133,8 +133,6 @@ Generating and Distributing Certificates
    * Your version of :file:`8eab4b8d-c0a2-4ce2-80aa-0709277a9a7a.key`
    * :file:`cluster.crt` (as created by the `flocker-ca initialize` step)
 
-   You will need to move the node cert and node key into :file:`/etc/flocker` and rename them :file:`node.crt` and :file:`node.key`.
-
    For example:
 
    .. prompt:: bash $
@@ -142,15 +140,22 @@ Generating and Distributing Certificates
       scp <yourUUID>.crt <user>@<hostname>:
       scp <yourUUID>.key <user>@<hostname>:
       scp cluster.crt root@<hostname>:
-      ssh <user>@<hostname> 'sudo mv <yourUUID>.crt /etc/flocker/node.crt'
-      ssh <user>@<hostname> 'sudo mv <yourUUID>.key /etc/flocker/node.key'
-      ssh <user>@<hostname> 'sudo mv cluster.crt /etc/flocker/cluster.crt'
+
+#. Move and rename the certificates.
+
+   On the node, move the cluster and node certificates into :file:`/etc/flocker` and rename the node certificate and key to :file:`node.crt` and :file:`node.key`.
+
+   .. prompt:: bash alice@linuxbox:~/$
+
+      sudo mv <yourUUID>.crt /etc/flocker/node.crt
+      sudo mv <yourUUID>.key /etc/flocker/node.key
+      sudo mv cluster.crt /etc/flocker/cluster.crt
 
 #. Change the permissions on the folder and key file.
 
    You will need to change the permissions on the :file:`/etc/flocker` directory, and the :file:`node.key` file:
 
-   .. prompt:: bash alice@linuxbox:~/#
+   .. prompt:: bash alice@linuxbox:~/$
 
       sudo chmod 0700 /etc/flocker
       sudo chmod 0600 /etc/flocker/node.key
