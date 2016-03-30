@@ -7,7 +7,8 @@ from ._model import (
     Put, SudoPut, put, sudo_put,
     Comment, comment,
     RunRemotely, run_remotely,
-    perform_comment, perform_put, perform_sudo
+    perform_run_script, perform_comment, perform_put,
+    perform_sudo, perform_sudo_put, perform_sudo_script,
 )
 
 __all__ = [
@@ -17,7 +18,8 @@ __all__ = [
     "Put", "SudoPut", "put", "sudo_put",
     "Comment", "comment",
     "RunRemotely", "run_remotely",
-    "perform_comment", "perform_put", "perform_sudo",
+    "perform_run_script", "perform_comment", "perform_put",
+    "perform_sudo", "perform_sudo_put", "perform_sudo_script",
 ]
 
 try:

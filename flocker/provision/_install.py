@@ -28,7 +28,7 @@ from ._common import PackageSource, Variants
 from ._ssh import (
     Run, Sudo,
     run_network_interacting_from_args, sudo_network_interacting_from_args,
-    run, put, run_from_args,
+    run, put, run_from_args, comment,
     sudo, sudo_put, sudo_from_args, sudo_script,
     run_remotely,
 )
@@ -138,6 +138,15 @@ def apt_get_install(args, sudo=False):
     return _from_args(sudo)(
         ["apt-get", "-y", "install", ] + args
     )
+
+
+def install_distro_package(package_name, distribution, sudo=False):
+    if type(package_name) != list:
+        package_name = [package_name]
+    if is_centos(distribution):
+        return yum_install(package_name, sudo=sudo)
+    else:
+        return apt_get_install(package_name, sudo=sudo)
 
 
 def apt_get_update(sudo=False):
@@ -307,6 +316,18 @@ def cli_pkg_test(package_source=PackageSource()):
             # installable release will be installed.
             expected = get_installable_version(version)
     return run('test `flocker-deploy --version` = {}'.format(quote(expected)))
+
+
+def allow_notty_sudo(distribution):
+    if is_centos(distribution):
+        return run_from_args([
+            'su', 'root', '-c', [
+                'sed', '--in-place', '-e',
+                's/Defaults.*requiretty/Defaults !requiretty/',
+                '/etc/sudoers'
+            ]])
+    else:
+        return comment("No need to modify sudoers on {}".format(distribution))
 
 
 def wipe_yum_cache(repository):
