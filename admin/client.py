@@ -26,9 +26,9 @@ from flocker.provision._install import (
     allow_notty_sudo,
 )
 from flocker.provision._ssh import (
-     Run, Sudo, RunScript, SudoScript, Put, SudoPut, Comment,
-     perform_sudo, perform_put, perform_sudo_put,
-     perform_run_script, perform_sudo_script,
+    Run, Sudo, RunScript, SudoScript, Put, SudoPut, Comment,
+    perform_sudo, perform_put, perform_sudo_put,
+    perform_run_script, perform_sudo_script,
 )
 from flocker.provision._effect import HTTPGet
 
