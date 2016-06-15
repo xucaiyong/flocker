@@ -47,7 +47,8 @@ Sphinx
 sphinxcontrib-httpdomain
 testtools
 treq
-Twisted
+--find-links https://twistedmatrix.com/Releases/pre/16.3.0pre1/Twisted-16.3.0rc1.tar.bz2#egg=Twisted-16.3.0rc1
+Twisted==16.3.0rc1
 txeffect
 PyYAML
 zope.interface
