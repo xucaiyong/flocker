@@ -52,7 +52,7 @@ jmespath==0.9.0
 linecache2==1.0.0
 monotonic==1.1
 pbr==1.10.0
-property-manager==1.6
+property-manager==2.1
 pyasn1==0.1.9
 pycparser==2.14
 pyOpenSSL==16.0.0
