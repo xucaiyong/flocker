@@ -1,7 +1,7 @@
 apache-libcloud==1.1.0
 # The `aws` command is required by the ``admin.installer``,
 # `admin.test.test_installer` and in the release process.
-awscli==1.10.46
+awscli==1.10.47
 bitmath==1.3.0.2
 boto==2.41.0
 characteristic==14.3.0
@@ -16,7 +16,7 @@ ndg-httpsclient==0.4.1
 --find-links git+https://github.com/ClusterHQ/pyrsistent@v0.11.13+chq5#egg=pyrsistent-0.11.13+chq5
 pyrsistent==0.11.13+chq5
 python-dateutil==2.5.3
-pytz==2016.4
+pytz==2016.6.1
 PyYAML==3.11
 requests==2.10.0
 requests-file==1.4
@@ -29,7 +29,7 @@ zope.interface==4.2.0
 ## The following requirements were added by pip freeze:
 attrs==16.0.0
 backports.ssl-match-hostname==3.5.0.1
-botocore==1.4.36
+botocore==1.4.37
 cached-property==1.3.0
 cffi==1.7.0
 chardet==2.3.0
