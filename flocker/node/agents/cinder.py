@@ -6,7 +6,7 @@ A Cinder implementation of the ``IBlockDeviceAPI``.
 """
 from itertools import repeat
 import json
-from subprocess import check_output, STDOUT
+from subprocess import CalledProcessError, check_output, STDOUT
 from tempfile import mkdtemp
 import time
 from uuid import UUID
@@ -487,7 +487,9 @@ class CinderBlockDeviceAPI(object):
 
     def _metadata_from_configdrive(self):
         mountpoint = FilePath(mkdtemp(suffix='.flocker.node.agents.cinder'))
-        metadata_file = mountpoint.descendant(['openstack', 'latest', 'meta_data.json'])
+        metadata_file = mountpoint.descendant(
+            ['openstack', 'latest', 'meta_data.json']
+        )
         try:
             try:
                 result = check_output(
@@ -497,7 +499,7 @@ class CinderBlockDeviceAPI(object):
             except CalledProcessError as e:
                 if e.returncode == 2 and not e.output:
                     # There is no config drive
-                    return 
+                    return
                 raise
             device_path = FilePath(result.rstrip())
             check_output(
