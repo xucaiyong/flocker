@@ -30,6 +30,8 @@ from cinderclient.exceptions import NotFound as CinderClientNotFound
 from novaclient.client import Client as NovaClient
 from novaclient.exceptions import NotFound as NovaNotFound
 from novaclient.exceptions import ClientException as NovaClientException
+import requests
+from requests.exceptions import ConnectionError, Timeout
 
 from twisted.python.filepath import FilePath
 from twisted.python.components import proxyForInterface
@@ -486,6 +488,10 @@ class CinderBlockDeviceAPI(object):
         return int(GiB(1).to_Byte().value)
 
     def _metadata_from_configdrive(self):
+        """
+        Attempt to mount the configdrive and return the decoded
+        metadata file.
+        """
         mountpoint = FilePath(mkdtemp(suffix='.flocker.node.agents.cinder'))
         metadata_file = mountpoint.descendant(
             ['openstack', 'latest', 'meta_data.json']
@@ -498,7 +504,12 @@ class CinderBlockDeviceAPI(object):
                 )
             except CalledProcessError as e:
                 if e.returncode == 2 and not e.output:
-                    # There is no config drive
+                    Message.new(
+                        message_type=(
+                            u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
+                            u"configdrive_not_available"),
+                        error_message=unicode(e),
+                    ).write()
                     return
                 raise
             device_path = FilePath(result.rstrip())
@@ -507,7 +518,17 @@ class CinderBlockDeviceAPI(object):
                 stderr=STDOUT,
             )
             try:
-                return json.loads(metadata_file.getContent())
+                try:
+                    content = metadata_file.getContent()
+                except IOError as e:
+                    Message.new(
+                        message_type=(
+                            u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
+                            u"metadata_file_not_found"),
+                        error_message=unicode(e),
+                    ).write()
+                    return
+                return json.loads(content)
             finally:
                 check_output(
                     ['umount', mountpoint.path],
@@ -517,17 +538,52 @@ class CinderBlockDeviceAPI(object):
             mountpoint.remove()
 
     def _compute_instance_id_from_configdrive(self):
+        """
+        Attempt to mount the config drive and get instance ID from the
+        metadata file.
+
+        http://docs.openstack.org/user-guide/cli-config-drive.html
+        """
         metadata = self._metadata_from_configdrive()
         if metadata is not None:
             return metadata["uuid"]
 
-    def _compute_instance_id_from_metadata_server(self):
-        return
+    def _compute_instance_id_from_metadata_service(self):
+        """
+        Attempt to access instance ID from the metadata service.
+
+        http://docs.openstack.org/admin-guide/compute-networking-nova.html#metadata-service
+        """
+        try:
+            response = requests.get(
+                'http://169.254.169.254/openstack/latest/meta_data.json',
+                timeout=1.0,
+            )
+        except (ConnectionError, Timeout) as e:
+            Message.new(
+                message_type=(
+                    u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
+                    u"metadata_service_unreachable"),
+                error_message=unicode(e),
+            ).write()
+            return 
+
+        if response.ok:
+            metadata = response.json()
+            return metadata["uuid"]
+        else:
+            Message.new(
+                message_type=(
+                    u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
+                    u"metadata_response_error"),
+                status_code=response.status_code,
+                content=response.content,
+            ).write()
 
     def _compute_instance_id_from_ipaddresses(self):
         """
-        Find the ``ACTIVE`` Nova API server with a subset of the IPv4 and IPv6
-        addresses on this node.
+        Find the ``ACTIVE`` Nova API server with an intersection of
+        the IPv4 and IPv6 addresses on this node.
         """
         local_ips = get_all_ips()
         api_ip_map = {}
@@ -551,9 +607,15 @@ class CinderBlockDeviceAPI(object):
             ).write()
 
     def compute_instance_id(self):
+        """
+        Attempt to find the local instance ID by from local
+        configdrive if it exists, from a metadata service or if that
+        fails by matching the local IP addresses to those reported by
+        the Nova API.
+        """
         methods = [
             self._compute_instance_id_from_configdrive,
-            self._compute_instance_id_from_metadata_server,
+            self._compute_instance_id_from_metadata_service,
             self._compute_instance_id_from_ipaddresses,
         ]
         for method in methods:
