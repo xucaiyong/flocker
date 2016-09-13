@@ -5,6 +5,9 @@
 A Cinder implementation of the ``IBlockDeviceAPI``.
 """
 from itertools import repeat
+import json
+from subprocess import check_output, STDOUT
+from tempfile import mkdtemp
 import time
 from uuid import UUID
 
@@ -482,7 +485,44 @@ class CinderBlockDeviceAPI(object):
         """
         return int(GiB(1).to_Byte().value)
 
-    def compute_instance_id(self):
+    def _metadata_from_configdrive(self):
+        mountpoint = FilePath(mkdtemp(suffix='.flocker.node.agents.cinder'))
+        metadata_file = mountpoint.descendant(['openstack', 'latest', 'meta_data.json'])
+        try:
+            try:
+                result = check_output(
+                    ['blkid', '-l', '-t', 'LABEL=config-2', '-o', 'device'],
+                    stderr=STDOUT,
+                )
+            except CalledProcessError as e:
+                if e.returncode == 2 and not e.output:
+                    # There is no config drive
+                    return 
+                raise
+            device_path = FilePath(result.rstrip())
+            check_output(
+                ['mount', '-o', 'ro', device_path.path, mountpoint.path],
+                stderr=STDOUT,
+            )
+            try:
+                return json.loads(metadata_file.getContent())
+            finally:
+                check_output(
+                    ['umount', mountpoint.path],
+                    stderr=STDOUT,
+                )
+        finally:
+            mountpoint.remove()
+
+    def _compute_instance_id_from_configdrive(self):
+        metadata = self._metadata_from_configdrive()
+        if metadata is not None:
+            return metadata["uuid"]
+
+    def _compute_instance_id_from_metadata_server(self):
+        return
+
+    def _compute_instance_id_from_ipaddresses(self):
         """
         Find the ``ACTIVE`` Nova API server with a subset of the IPv4 and IPv6
         addresses on this node.
@@ -507,7 +547,18 @@ class CinderBlockDeviceAPI(object):
             COMPUTE_INSTANCE_ID_NOT_FOUND(
                 local_ips=local_ips, api_ips=api_ip_map
             ).write()
-            raise UnknownInstanceID(self)
+
+    def compute_instance_id(self):
+        methods = [
+            self._compute_instance_id_from_configdrive,
+            self._compute_instance_id_from_metadata_server,
+            self._compute_instance_id_from_ipaddresses,
+        ]
+        for method in methods:
+            result = method()
+            if result is not None:
+                return result
+        raise UnknownInstanceID(self)
 
     def create_volume(self, dataset_id, size):
         """
