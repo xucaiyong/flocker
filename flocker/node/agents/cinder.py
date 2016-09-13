@@ -489,8 +489,7 @@ class CinderBlockDeviceAPI(object):
 
     def _metadata_from_configdrive(self):
         """
-        Attempt to mount the configdrive and return the decoded
-        metadata file.
+        Attempt to mount the configdrive and return the decoded metadata file.
         """
         mountpoint = FilePath(mkdtemp(suffix='.flocker.node.agents.cinder'))
         metadata_file = mountpoint.descendant(
@@ -506,8 +505,8 @@ class CinderBlockDeviceAPI(object):
                 if e.returncode == 2 and not e.output:
                     Message.new(
                         message_type=(
-                            u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
-                            u"configdrive_not_available"),
+                            u"flocker:node:agents:blockdevice:openstack:"
+                            u"compute_instance_id:configdrive_not_available"),
                         error_message=unicode(e),
                     ).write()
                     return
@@ -523,8 +522,8 @@ class CinderBlockDeviceAPI(object):
                 except IOError as e:
                     Message.new(
                         message_type=(
-                            u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
-                            u"metadata_file_not_found"),
+                            u"flocker:node:agents:blockdevice:openstack:"
+                            u"compute_instance_id:metadata_file_not_found"),
                         error_message=unicode(e),
                     ).write()
                     return
@@ -539,8 +538,8 @@ class CinderBlockDeviceAPI(object):
 
     def _compute_instance_id_from_configdrive(self):
         """
-        Attempt to mount the config drive and get instance ID from the
-        metadata file.
+        Attempt to mount the config drive and get instance ID from the metadata
+        file.
 
         http://docs.openstack.org/user-guide/cli-config-drive.html
         """
@@ -562,11 +561,11 @@ class CinderBlockDeviceAPI(object):
         except (ConnectionError, Timeout) as e:
             Message.new(
                 message_type=(
-                    u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
-                    u"metadata_service_unreachable"),
+                    u"flocker:node:agents:blockdevice:openstack:"
+                    u"compute_instance_id:metadata_service_unreachable"),
                 error_message=unicode(e),
             ).write()
-            return 
+            return
 
         if response.ok:
             metadata = response.json()
@@ -574,8 +573,8 @@ class CinderBlockDeviceAPI(object):
         else:
             Message.new(
                 message_type=(
-                    u"flocker:node:agents:blockdevice:openstack:compute_instance_id:"
-                    u"metadata_response_error"),
+                    u"flocker:node:agents:blockdevice:openstack:"
+                    u"compute_instance_id:metadata_response_error"),
                 status_code=response.status_code,
                 content=response.content,
             ).write()
@@ -608,10 +607,9 @@ class CinderBlockDeviceAPI(object):
 
     def compute_instance_id(self):
         """
-        Attempt to find the local instance ID by from local
-        configdrive if it exists, from a metadata service or if that
-        fails by matching the local IP addresses to those reported by
-        the Nova API.
+        Attempt to find the local instance ID by from local configdrive if it
+        exists, from a metadata service or if that fails by matching the local
+        IP addresses to those reported by the Nova API.
         """
         methods = [
             self._compute_instance_id_from_configdrive,
