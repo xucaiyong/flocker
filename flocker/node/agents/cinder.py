@@ -607,9 +607,10 @@ class CinderBlockDeviceAPI(object):
 
     def compute_instance_id(self):
         """
-        Attempt to find the local instance ID by from local configdrive if it
-        exists, from a metadata service or if that fails by matching the local
-        IP addresses to those reported by the Nova API.
+        Attempt to find the local instance ID:
+        * from local configdrive if it exists, or
+        * from metadata service, or
+        * by matching the local IP addresses to those reported by the Nova API.
         """
         methods = [
             self._compute_instance_id_from_configdrive,
